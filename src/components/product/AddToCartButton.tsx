@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cart";
 import type { Product } from "@/lib/products";
+import { ADMIN_CANNOT_BUY, useViewer } from "@/components/layout/ViewerContext";
 
 export function AddToCartButton({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const outOfStock = product.stock <= 0;
+  const { isAdmin } = useViewer();
 
   function handleAdd() {
     addItem(
@@ -25,11 +27,29 @@ export function AddToCartButton({ product }: { product: Product }) {
     setTimeout(() => setAdded(false), 1800);
   }
 
+  if (isAdmin) {
+    return (
+      <div className="flex flex-col gap-2">
+        <button
+          type="button"
+          disabled
+          aria-describedby="admin-cannot-buy"
+          className="h-[52px] w-full rounded-[11px] bg-line-strong px-6 text-base font-semibold text-muted"
+        >
+          Añadir al carrito
+        </button>
+        <p id="admin-cannot-buy" className="text-xs text-muted">
+          {ADMIN_CANNOT_BUY}
+        </p>
+      </div>
+    );
+  }
+
   if (outOfStock) {
     return (
       <button
         disabled
-        className="w-full rounded-full bg-surface px-6 py-3 text-sm font-semibold text-muted"
+        className="h-[52px] w-full rounded-[11px] bg-surface px-6 text-sm font-semibold text-muted"
       >
         Agotado
       </button>
@@ -37,21 +57,21 @@ export function AddToCartButton({ product }: { product: Product }) {
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center rounded-full border border-line-strong">
+    <div className="flex flex-wrap items-center gap-2.5">
+      <div className="flex h-[52px] items-center overflow-hidden rounded-[11px] border border-line-strong">
         <button
           type="button"
           onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-          className="px-3.5 py-2 text-sm text-ink hover:text-copper"
+          className="h-full w-12 bg-surface text-lg text-ink hover:text-accent"
           aria-label="Reducir cantidad"
         >
           −
         </button>
-        <span className="min-w-[2ch] text-center text-sm text-ink">{quantity}</span>
+        <span className="w-12 text-center tabular-nums text-base text-ink">{quantity}</span>
         <button
           type="button"
           onClick={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-          className="px-3.5 py-2 text-sm text-ink hover:text-copper"
+          className="h-full w-12 bg-surface text-lg text-ink hover:text-accent"
           aria-label="Aumentar cantidad"
         >
           +
@@ -60,7 +80,7 @@ export function AddToCartButton({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAdd}
-        className="flex-1 rounded-full bg-copper px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-copper-ink"
+        className="h-[52px] flex-[1_1_200px] rounded-[11px] bg-accent px-6 text-base font-semibold text-white transition-colors hover:bg-accent-ink"
       >
         {added ? "Añadido ✓" : "Añadir al carrito"}
       </button>

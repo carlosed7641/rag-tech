@@ -4,8 +4,8 @@ import { useState } from "react";
 import { formatCurrency } from "@/lib/format";
 
 const THUMB =
-  "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-copper [&::-webkit-slider-thumb]:bg-bg [&::-webkit-slider-thumb]:shadow-sm " +
-  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-copper [&::-moz-range-thumb]:bg-bg [&::-moz-range-thumb]:shadow-sm";
+  "[&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-accent [&::-webkit-slider-thumb]:bg-card [&::-webkit-slider-thumb]:shadow-sm " +
+  "[&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-accent [&::-moz-range-thumb]:bg-card [&::-moz-range-thumb]:shadow-sm";
 
 export function PriceRangeSlider({
   boundsMin,
@@ -32,7 +32,7 @@ export function PriceRangeSlider({
       <div className="relative h-4">
         <div className="absolute top-1/2 h-1.5 w-full -translate-y-1/2 rounded-full bg-line" />
         <div
-          className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-copper"
+          className="absolute top-1/2 h-1.5 -translate-y-1/2 rounded-full bg-accent"
           style={{ left: `${minPct}%`, right: `${100 - maxPct}%` }}
         />
         <input

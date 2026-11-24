@@ -19,6 +19,9 @@ export default function LoginPage() {
 
 function LoginForm() {
   const [serverError, setServerError] = useState<string | null>(null);
+  // Login OK y navegando: el botón sigue deshabilitado hasta que cargue la
+  // página siguiente (isSubmitting vuelve a false antes de que termine la recarga).
+  const [redirecting, setRedirecting] = useState(false);
   const searchParams = useSearchParams();
   const {
     register,
@@ -44,12 +47,13 @@ function LoginForm() {
     // Vuelve a donde el usuario estaba (?next=) si venía de una redirección
     // del proxy, o a /cuenta si entró a /login directamente.
     const target = safeRedirectTarget(searchParams.get("next"));
+    setRedirecting(true);
     window.location.assign(target);
   }
 
   return (
     <div className="w-full max-w-sm">
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Iniciar sesión</h1>
+      <h1 className="mb-8 text-[32px] font-bold leading-tight text-ink">Iniciar sesión</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <Field label="Correo" error={errors.email?.message}>
@@ -57,7 +61,7 @@ function LoginForm() {
             type="email"
             autoComplete="email"
             {...register("email")}
-            className="w-full rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </Field>
 
@@ -66,18 +70,18 @@ function LoginForm() {
             type="password"
             autoComplete="current-password"
             {...register("password")}
-            className="w-full rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </Field>
 
-        {serverError && <p className="text-xs text-copper">{serverError}</p>}
+        {serverError && <p className="text-xs text-danger">{serverError}</p>}
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="mt-2 rounded-full bg-copper px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-copper-ink disabled:opacity-60"
+          disabled={isSubmitting || redirecting}
+          className="mt-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
         >
-          {isSubmitting ? "Entrando…" : "Entrar"}
+          {isSubmitting || redirecting ? "Entrando…" : "Entrar"}
         </button>
       </form>
 
@@ -89,7 +93,7 @@ function LoginForm() {
               ? `/registro?next=${encodeURIComponent(searchParams.get("next")!)}`
               : "/registro"
           }
-          className="font-semibold text-copper hover:text-copper-ink"
+          className="font-semibold text-accent hover:text-accent-ink"
         >
           Regístrate
         </Link>
@@ -109,11 +113,11 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <span className="eyebrow text-muted">
         {label}
       </span>
       {children}
-      {error && <span className="text-xs text-copper">{error}</span>}
+      {error && <span className="text-xs text-danger">{error}</span>}
     </label>
   );
 }

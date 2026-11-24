@@ -14,13 +14,13 @@ export default async function AdminCouponsPage() {
 
   return (
     <div>
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Cupones</h1>
+      <h1 className="mb-8 text-3xl font-bold tracking-[-0.03em] text-ink">Cupones</h1>
 
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="overflow-x-auto rounded-lg border border-line">
+        <div className="overflow-x-auto rounded-2xl border border-line bg-card">
           <table className="w-full min-w-[520px] text-sm">
             <thead>
-              <tr className="border-b border-line bg-surface text-left text-xs font-medium uppercase tracking-wide text-muted">
+              <tr className="border-b border-line bg-surface text-left eyebrow text-muted">
                 <th className="px-4 py-3">Código</th>
                 <th className="px-4 py-3">Valor</th>
                 <th className="px-4 py-3">Usos</th>
@@ -43,8 +43,8 @@ export default async function AdminCouponsPage() {
                     <span
                       className={
                         c.is_active
-                          ? "rounded-full bg-signal/10 px-2.5 py-1 text-xs font-semibold text-signal"
-                          : "rounded-full bg-muted/10 px-2.5 py-1 text-xs font-semibold text-muted"
+                          ? "rounded-md bg-signal/10 px-2.5 py-1 text-xs font-semibold text-signal"
+                          : "rounded-md bg-muted/10 px-2.5 py-1 text-xs font-semibold text-muted"
                       }
                     >
                       {c.is_active ? "Activo" : "Inactivo"}

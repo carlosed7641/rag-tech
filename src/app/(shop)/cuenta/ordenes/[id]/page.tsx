@@ -3,13 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getOrderWithItems } from "@/lib/orders";
 import { OrderReceipt } from "@/components/orders/OrderReceipt";
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Pendiente",
-  paid: "Pagada",
-  shipped: "Enviada",
-  cancelled: "Cancelada",
-};
+import { orderStatusLabel } from "@/lib/order-status";
 
 export default async function OrderDetailPage({
   params,
@@ -38,11 +32,11 @@ export default async function OrderDetailPage({
       </Link>
 
       <div className="mb-2 flex items-center gap-3">
-        <h1 className="text-2xl font-extrabold text-ink">
+        <h1 className="text-[32px] font-bold leading-tight tracking-[-0.03em] text-ink md:text-[40px]">
           Orden #{order.id.slice(0, 8)}
         </h1>
         <span className="text-sm font-medium text-signal">
-          {STATUS_LABEL[order.status] ?? order.status}
+          {orderStatusLabel(order.status)}
         </span>
       </div>
       <p className="mb-9 text-sm text-muted">

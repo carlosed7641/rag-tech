@@ -1,16 +1,12 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getViewer } from "@/lib/viewer";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/format";
 import { LogoutButton } from "@/components/account/LogoutButton";
 import { AddAddressForm } from "@/components/account/AddAddressForm";
 import { AddressItem } from "@/components/account/AddressItem";
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Pendiente",
-  paid: "Pagada",
-  shipped: "Enviada",
-  cancelled: "Cancelada",
-};
+import { orderStatusLabel } from "@/lib/order-status";
 
 export default async function AccountPage() {
   const supabase = await createClient();
@@ -20,6 +16,10 @@ export default async function AccountPage() {
 
   // proxy.ts ya protege esta ruta, pero por si acaso.
   if (!user) return null;
+
+  // Un admin no tiene cuenta de cliente (no compra): su "cuenta" es el panel.
+  const { isAdmin } = await getViewer();
+  if (isAdmin) redirect("/admin");
 
   const [{ data: profile }, { data: orders }, { data: addresses }] =
     await Promise.all([
@@ -44,7 +44,7 @@ export default async function AccountPage() {
     <div className="mx-auto max-w-3xl px-4 py-14 md:px-8">
       <div className="mb-10 flex items-start justify-between">
         <div>
-          <h1 className="break-words text-2xl font-extrabold text-ink">
+          <h1 className="break-words text-[32px] font-bold leading-tight tracking-[-0.03em] text-ink md:text-[40px]">
             {profile?.full_name || "Mi cuenta"}
           </h1>
           <p className="mt-1 text-sm text-muted">{user.email}</p>
@@ -53,7 +53,7 @@ export default async function AccountPage() {
       </div>
 
       <section className="mb-12">
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">
+        <h2 className="mb-4 eyebrow text-muted">
           Direcciones
         </h2>
         <div className="flex flex-col gap-3">
@@ -71,7 +71,7 @@ export default async function AccountPage() {
       </section>
 
       <section>
-        <h2 className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted">
+        <h2 className="mb-4 eyebrow text-muted">
           Historial de órdenes
         </h2>
         {!orders || orders.length === 0 ? (
@@ -86,7 +86,7 @@ export default async function AccountPage() {
                 <li key={o.id}>
                   <Link
                     href={`/cuenta/ordenes/${o.id}`}
-                    className="flex items-center justify-between gap-4 rounded-xl bg-surface px-4 py-3 hover:ring-2 hover:ring-copper"
+                    className="flex items-center justify-between gap-4 rounded-xl border border-line bg-card px-4 py-3 hover:ring-2 hover:ring-accent"
                   >
                     <div className="min-w-0">
                       <div>
@@ -98,7 +98,7 @@ export default async function AccountPage() {
                           })}
                         </span>
                         <span className="ml-3 text-xs font-medium text-signal">
-                          {STATUS_LABEL[o.status] ?? o.status}
+                          {orderStatusLabel(o.status)}
                         </span>
                       </div>
                       {preview && (

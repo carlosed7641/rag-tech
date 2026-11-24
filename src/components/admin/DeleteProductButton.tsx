@@ -18,7 +18,7 @@ export function DeleteProductButton({ productId }: { productId: string }) {
           deleteProduct(productId);
         });
       }}
-      className="text-xs font-semibold text-muted hover:text-red-600 disabled:opacity-60"
+      className="text-xs font-semibold text-muted hover:text-danger disabled:opacity-60"
     >
       {pending ? "Eliminando…" : "Eliminar"}
     </button>

@@ -18,12 +18,12 @@ export default async function SearchResultsPage({
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14 md:px-8">
+    <div className="mx-auto max-w-[1240px] px-4 py-14 md:px-6">
       <div className="mb-9">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="eyebrow text-muted">
           Búsqueda
         </span>
-        <h1 className="mt-2 break-words text-balance text-2xl font-extrabold text-ink">
+        <h1 className="mt-2 break-words text-balance text-[32px] font-bold leading-tight tracking-[-0.03em] text-ink md:text-[40px]">
           Resultados para &ldquo;{q}&rdquo;
         </h1>
         <p className="mt-1 text-sm text-muted">
@@ -39,7 +39,7 @@ export default async function SearchResultsPage({
       ) : products.length === 0 ? (
         <div className="py-16 text-center text-muted">
           <p>No encontramos productos que coincidan con &ldquo;{q}&rdquo;.</p>
-          <Link href="/productos" className="mt-3 inline-block text-copper hover:text-copper-ink">
+          <Link href="/productos" className="mt-3 inline-block text-accent hover:text-accent-ink">
             Ver todo el catálogo →
           </Link>
         </div>
@@ -58,7 +58,7 @@ export default async function SearchResultsPage({
                 className={
                   page <= 1
                     ? "pointer-events-none text-muted/40"
-                    : "text-ink hover:text-copper"
+                    : "text-ink hover:text-accent"
                 }
               >
                 ← Anterior
@@ -71,7 +71,7 @@ export default async function SearchResultsPage({
                 className={
                   page >= totalPages
                     ? "pointer-events-none text-muted/40"
-                    : "text-ink hover:text-copper"
+                    : "text-ink hover:text-accent"
                 }
               >
                 Siguiente →
