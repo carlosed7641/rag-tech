@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/format";
+import { orderStatusLabel } from "@/lib/order-status";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
@@ -30,7 +31,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Dashboard</h1>
+      <h1 className="mb-8 text-3xl font-bold tracking-[-0.03em] text-ink">Dashboard</h1>
 
       <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label="Ventas totales" value={formatCurrency(totalVentas)} />
@@ -46,7 +47,7 @@ export default async function AdminDashboardPage() {
           {recentOrders.length === 0 ? (
             <p className="text-sm text-muted">Todavía no hay órdenes.</p>
           ) : (
-            <ul className="divide-y divide-line rounded-lg border border-line">
+            <ul className="divide-y divide-line rounded-2xl border border-line bg-card">
               {recentOrders.map((o) => (
                 <li key={o.id}>
                   <Link
@@ -54,7 +55,7 @@ export default async function AdminDashboardPage() {
                     className="flex items-center justify-between px-4 py-3 text-sm hover:bg-surface"
                   >
                     <span className="text-muted">
-                      #{o.id.slice(0, 8)} · {o.status}
+                      #{o.id.slice(0, 8)} · {orderStatusLabel(o.status)}
                     </span>
                     <span className="font-semibold text-ink">
                       {formatCurrency(Number(o.total))}
@@ -73,7 +74,7 @@ export default async function AdminDashboardPage() {
           {lowStock.length === 0 ? (
             <p className="text-sm text-muted">Todo el inventario está sano.</p>
           ) : (
-            <ul className="divide-y divide-line rounded-lg border border-line">
+            <ul className="divide-y divide-line rounded-2xl border border-line bg-card">
               {lowStock.map((p) => (
                 <li key={p.id}>
                   <Link
@@ -81,7 +82,7 @@ export default async function AdminDashboardPage() {
                     className="flex items-center justify-between px-4 py-3 text-sm hover:bg-surface"
                   >
                     <span className="text-ink">{p.name}</span>
-                    <span className="font-semibold text-copper">
+                    <span className="font-semibold text-accent">
                       {p.stock} und.
                     </span>
                   </Link>
@@ -97,11 +98,11 @@ export default async function AdminDashboardPage() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-line bg-surface p-5">
-      <p className="mb-1 text-xs font-medium uppercase tracking-wide text-muted">
+    <div className="rounded-2xl border border-line bg-card p-5">
+      <p className="mb-1 eyebrow text-muted">
         {label}
       </p>
-      <p className="text-2xl font-extrabold text-ink">{value}</p>
+      <p className="text-2xl font-bold text-ink">{value}</p>
     </div>
   );
 }

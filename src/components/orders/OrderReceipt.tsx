@@ -37,7 +37,7 @@ export function OrderReceipt({ order, items }: { order: Order; items: OrderItem[
         )}
         <div className="flex justify-between text-base font-bold">
           <span className="text-ink">Total</span>
-          <span className="text-copper">{formatCurrency(order.total)}</span>
+          <span className="text-accent">{formatCurrency(order.total)}</span>
         </div>
       </div>
     </>

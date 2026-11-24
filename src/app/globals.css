@@ -1,32 +1,55 @@
 @import "tailwindcss";
 
+/*
+ * Paleta RagTech — verde bosque / menta.
+ * - ink / forest: superficies oscuras (paneles del asistente, bandas).
+ * - accent: verde de acción con contraste AA sobre blanco y menta
+ *   (#16a34a NO pasa 4.5:1 en texto pequeño; queda como `leaf` para
+ *   puntos, fondos y decoración).
+ * - lime: acento sobre fondos oscuros.
+ */
 :root {
-  --bg: #ffffff;
-  --surface: #f7f7f7;
-  --ink: #171717;
-  --muted: #737373;
-  --line: #ebebeb;
-  --line-strong: #d9d9d9;
-  --copper: #b5652e;
-  --copper-ink: #8a4b21;
-  --signal: #4d8d3f;
-  --focus: #b5652e;
+  --bg: #f6faf7;
+  --card: #ffffff;
+  --surface: #eef5f0;
+  --ink: #0b1f16;
+  --forest: #0f2a1d;
+  --muted: #5c7268;
+  --sage: #9dbdb0;
+  --line: #e3ede7;
+  --line-strong: #c6d8ce;
+  --accent: #128040;
+  --accent-ink: #0d6633;
+  --leaf: #16a34a;
+  --lime: #4ade80;
+  --mint: #dcfce7;
+  --mint-soft: #eaf7ef;
+  --signal: #128040;
+  --focus: #128040;
+  --danger: #b42318;
 }
 
 @theme inline {
   --color-bg: var(--bg);
+  --color-card: var(--card);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
+  --color-forest: var(--forest);
   --color-muted: var(--muted);
+  --color-sage: var(--sage);
   --color-line: var(--line);
   --color-line-strong: var(--line-strong);
-  --color-copper: var(--copper);
-  --color-copper-ink: var(--copper-ink);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-leaf: var(--leaf);
+  --color-lime: var(--lime);
+  --color-mint: var(--mint);
+  --color-mint-soft: var(--mint-soft);
   --color-signal: var(--signal);
   --color-focus: var(--focus);
-  --font-display: var(--font-manrope);
-  --font-body: var(--font-manrope);
-  --font-mono: var(--font-manrope);
+  --color-danger: var(--danger);
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-plex-sans);
 }
 
 * {
@@ -36,7 +59,21 @@
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: var(--font-body), "Segoe UI", sans-serif;
+  font-family: var(--font-body), "Segoe UI", system-ui, sans-serif;
+}
+
+/* Títulos en Space Grotesk en TODAS las rutas (tienda, auth, admin) sin
+   tener que tocar cada página. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-display), "Segoe UI", sans-serif;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: var(--mint);
+  color: var(--ink);
 }
 
 /* Anillo de foco por defecto para accesibilidad — se respeta .outline-none
@@ -57,17 +94,89 @@ button:disabled,
   cursor: not-allowed;
 }
 
-/* Input estándar reutilizado por los forms del CMS (/admin). */
+/* Input estándar reutilizado por los forms (auth, cuenta, checkout, CMS). */
 .input {
   width: 100%;
-  border-radius: 0.75rem;
+  border-radius: 0.6875rem;
   border: 1px solid var(--line-strong);
-  background: var(--bg);
+  background: var(--card);
   padding: 0.625rem 0.875rem;
   font-size: 0.875rem;
   color: var(--ink);
 }
+.input::placeholder {
+  color: var(--muted);
+}
 .input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--copper);
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--mint);
+}
+
+/* Etiqueta corta en mayúsculas sobre títulos y specs. */
+.eyebrow {
+  font-family: var(--font-display), "Segoe UI", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Barras de scroll de marca: delgadas, riel transparente y pulgar verde.
+   `scrollbar-*` cubre Firefox y Chrome 121+; los pseudo-elementos
+   ::-webkit-scrollbar cubren Safari. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+*:hover {
+  scrollbar-color: var(--accent) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
+}
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* Variante sobre paneles verde bosque (conversación del hero). */
+.scroll-dark {
+  scrollbar-color: rgba(74, 222, 128, 0.35) transparent;
+}
+.scroll-dark:hover {
+  scrollbar-color: var(--lime) transparent;
+}
+.scroll-dark::-webkit-scrollbar-thumb {
+  background-color: rgba(74, 222, 128, 0.35);
+}
+.scroll-dark::-webkit-scrollbar-thumb:hover {
+  background-color: var(--lime);
+}
+
+/* En móvil (pantallas angostas o táctiles) la barra no se muestra: el
+   scroll sigue funcionando con el dedo. Va al final para ganar a las
+   reglas anteriores. */
+@media (max-width: 767px), (pointer: coarse) {
+  *,
+  *:hover,
+  .scroll-dark,
+  .scroll-dark:hover {
+    scrollbar-width: none;
+  }
+  ::-webkit-scrollbar {
+    display: none;
+  }
 }

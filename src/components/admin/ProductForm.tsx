@@ -240,17 +240,17 @@ export function ProductForm({
           primera miniatura (no el input de archivo) — cualquier click en esta
           sección terminaba disparando ese botón y borrando la imagen. */}
       <div className="block">
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">
+        <span className="mb-1.5 block eyebrow text-muted">
           Imágenes
         </span>
         <div className="mb-3 flex flex-wrap gap-3">
           {existingImages.map((src, i) => (
             <div
               key={`existing-${src}`}
-              className="group relative h-20 w-20 overflow-hidden rounded-lg border border-line"
+              className="group relative h-20 w-20 overflow-hidden rounded-2xl border border-line bg-card"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" className="h-full w-full object-cover" />
+              <img src={src} alt="" className="h-full w-full object-contain" />
               <button
                 type="button"
                 onClick={() => removeExisting(i)}
@@ -263,11 +263,11 @@ export function ProductForm({
           {pendingImages.map((p, i) => (
             <div
               key={`pending-${p.previewUrl}`}
-              className="group relative h-20 w-20 overflow-hidden rounded-lg border-2 border-dashed border-copper/50"
+              className="group relative h-20 w-20 overflow-hidden rounded-lg border-2 border-dashed border-accent/50"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.previewUrl} alt="" className="h-full w-full object-cover" />
-              <span className="absolute left-1 top-1 rounded-full bg-copper px-1.5 py-0.5 text-[10px] font-semibold text-white">
+              <img src={p.previewUrl} alt="" className="h-full w-full object-contain" />
+              <span className="absolute left-1 top-1 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-semibold text-white">
                 Nueva
               </span>
               <button
@@ -282,7 +282,7 @@ export function ProductForm({
         </div>
         <label
           htmlFor={fileInputId}
-          className="inline-block rounded-full border border-line-strong px-4 py-2 text-sm font-medium text-ink hover:border-copper hover:text-copper"
+          className="inline-block rounded-xl border border-line-strong px-4 py-2 text-sm font-medium text-ink hover:border-accent hover:text-accent"
         >
           + Subir imágenes
         </label>
@@ -310,7 +310,7 @@ export function ProductForm({
           type="checkbox"
           name="isActive"
           defaultChecked={product?.is_active ?? true}
-          className="h-4 w-4 accent-copper"
+          className="h-4 w-4 accent-accent"
         />
         Activo (visible en la tienda)
       </label>
@@ -320,7 +320,7 @@ export function ProductForm({
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-copper px-6 py-3 text-sm font-semibold text-white hover:bg-copper-ink disabled:opacity-60"
+        className="rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white hover:bg-accent-ink disabled:opacity-60"
       >
         {pending
           ? pendingImages.length > 0
@@ -337,7 +337,7 @@ export function ProductForm({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">
+      <span className="mb-1.5 block eyebrow text-muted">
         {label}
       </span>
       {children}

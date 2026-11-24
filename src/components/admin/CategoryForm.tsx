@@ -10,13 +10,13 @@ export function CategoryForm({ categories }: { categories: Category[] }) {
   return (
     <form action={formAction} className="max-w-sm space-y-4">
       <label className="block">
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">
+        <span className="mb-1.5 block eyebrow text-muted">
           Nombre
         </span>
         <input name="name" required className="input" />
       </label>
       <label className="block">
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">
+        <span className="mb-1.5 block eyebrow text-muted">
           Slug
         </span>
         <input
@@ -28,7 +28,7 @@ export function CategoryForm({ categories }: { categories: Category[] }) {
         />
       </label>
       <label className="block">
-        <span className="mb-1.5 block text-xs font-medium uppercase tracking-wide text-muted">
+        <span className="mb-1.5 block eyebrow text-muted">
           Categoría padre (opcional)
         </span>
         <select name="parentId" defaultValue="" className="input">
@@ -44,7 +44,7 @@ export function CategoryForm({ categories }: { categories: Category[] }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-full bg-copper px-5 py-2.5 text-sm font-semibold text-white hover:bg-copper-ink disabled:opacity-60"
+        className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-ink disabled:opacity-60"
       >
         {pending ? "Guardando…" : "Crear categoría"}
       </button>

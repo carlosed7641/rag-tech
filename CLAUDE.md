@@ -20,6 +20,8 @@ Ecommerce (Next.js App Router + Supabase) con un chat de compras que usa tool ca
 
 ## Convenciones
 
+- Todo cambio de schema (tablas, RLS, funciones, triggers) va como migración en `supabase/migrations/`, con el mismo `version_name` con que queda registrada en Supabase (`supabase_migrations.schema_migrations`). No editar la DB a mano desde el dashboard sin dejar la migración en el repo.
+- Los admins no pueden comprar: además de la UI, lo impide el trigger `orders_prevent_admin` (migración 013).
 - Schemas Zod se comparten entre formulario, API route y `inputSchema` de las tools del chat (`src/lib/schemas/`) — no duplicar validación.
 - Precios en **COP**, no USD/MXN.
 - Al editar un producto desde el CMS, marcar `embedding_updated_at = null` para que quede pendiente de re-embeber (no recalcular el embedding de forma síncrona/bloqueante ahí).

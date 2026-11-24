@@ -1,13 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { formatCurrency } from "@/lib/format";
-
-const STATUS_LABEL: Record<string, string> = {
-  pending: "Pendiente",
-  paid: "Pagada",
-  shipped: "Enviada",
-  cancelled: "Cancelada",
-};
+import { orderStatusLabel } from "@/lib/order-status";
 
 export default async function AdminOrdersPage() {
   const supabase = await createClient();
@@ -20,12 +14,12 @@ export default async function AdminOrdersPage() {
 
   return (
     <div>
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Órdenes</h1>
+      <h1 className="mb-8 text-3xl font-bold tracking-[-0.03em] text-ink">Órdenes</h1>
 
-      <div className="overflow-x-auto rounded-lg border border-line">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-card">
         <table className="w-full min-w-[560px] text-sm">
           <thead>
-            <tr className="border-b border-line bg-surface text-left text-xs font-medium uppercase tracking-wide text-muted">
+            <tr className="border-b border-line bg-surface text-left eyebrow text-muted">
               <th className="px-4 py-3">Orden</th>
               <th className="px-4 py-3">Fecha</th>
               <th className="px-4 py-3">Estado</th>
@@ -38,7 +32,7 @@ export default async function AdminOrdersPage() {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/ordenes/${o.id}`}
-                    className="font-medium text-ink hover:text-copper"
+                    className="font-medium text-ink hover:text-accent"
                   >
                     #{o.id.slice(0, 8)}
                   </Link>
@@ -50,7 +44,7 @@ export default async function AdminOrdersPage() {
                     year: "numeric",
                   })}
                 </td>
-                <td className="px-4 py-3 text-ink">{STATUS_LABEL[o.status] ?? o.status}</td>
+                <td className="px-4 py-3 text-ink">{orderStatusLabel(o.status)}</td>
                 <td className="px-4 py-3 font-semibold text-ink">
                   {formatCurrency(Number(o.total))}
                 </td>

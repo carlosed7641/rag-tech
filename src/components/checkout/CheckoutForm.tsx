@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCartStore, useCartSubtotal } from "@/store/cart";
 import { useIsClient } from "@/lib/useIsClient";
 import { formatCurrency } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/lib/supabase/database.types";
+import { addressSchema } from "@/lib/schemas/address";
+
+// Valores crudos del formulario (todo texto); addressSchema los valida.
+type AddressFields = { line1: string; city: string; state: string; zip: string };
+import { DepartmentSelect } from "@/components/account/DepartmentSelect";
 
 type Address = Tables<"addresses">;
 
@@ -26,11 +32,49 @@ export function CheckoutForm({
   const [selectedAddressId, setSelectedAddressId] = useState<string | "new">(
     addresses[0]?.id ?? "new",
   );
+  // Campos de la dirección nueva (controlados para poder habilitar/deshabilitar
+  // el botón según estén completos los obligatorios).
+  const [newAddress, setNewAddress] = useState<AddressFields>({
+    line1: "",
+    city: "",
+    state: "",
+    zip: "",
+  });
   const [couponCode, setCouponCode] = useState("");
   const [pending, setPending] = useState(false);
+  // Orden ya creada y navegando a la confirmación: muestra un loader en vez
+  // del carrito (que se vacía en ese momento) para no mostrar "carrito vacío".
+  const [redirecting, setRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   if (!isClient) return null;
+
+  // Con una dirección guardada seleccionada no hay nada que completar; con
+  // "dirección nueva", deben estar los campos obligatorios del schema.
+  const addressComplete =
+    selectedAddressId !== "new" || addressSchema.safeParse(newAddress).success;
+
+  function updateField(field: keyof AddressFields) {
+    return (e: React.ChangeEvent<HTMLInputElement>) =>
+      setNewAddress((a) => ({ ...a, [field]: e.target.value }));
+  }
+
+  if (redirecting) {
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        className="flex flex-col items-center gap-4 py-20 text-center"
+      >
+        <span
+          aria-hidden="true"
+          className="h-10 w-10 animate-spin rounded-full border-[3px] border-mint border-t-accent"
+        />
+        <p className="font-display text-xl font-semibold text-ink">Confirmando tu pedido…</p>
+        <p className="text-sm text-muted">Esto toma solo unos segundos.</p>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
@@ -40,17 +84,18 @@ export function CheckoutForm({
     );
   }
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit() {
     setPending(true);
     setError(null);
 
+    const parsedNew = addressSchema.safeParse(newAddress);
     const shippingAddress =
       selectedAddressId === "new"
         ? {
-            line1: String(formData.get("line1") ?? ""),
-            city: String(formData.get("city") ?? ""),
-            state: String(formData.get("state") ?? "") || null,
-            zip: String(formData.get("zip") ?? ""),
+            line1: parsedNew.data?.line1 ?? "",
+            city: parsedNew.data?.city ?? "",
+            state: parsedNew.data?.state || null,
+            zip: parsedNew.data?.zip ?? "",
             country: "CO",
           }
         : (() => {
@@ -77,12 +122,15 @@ export function CheckoutForm({
       p_coupon_code: couponCode.trim() || undefined,
     });
 
-    setPending(false);
-
     if (rpcError) {
+      setPending(false);
       setError(rpcError.message);
       return;
     }
+
+    // A partir de aquí la orden existe: el loader reemplaza al formulario
+    // hasta que cargue la página de confirmación.
+    setRedirecting(true);
 
     // Si el usuario escribió una dirección nueva, la guardamos en su
     // libreta de direcciones para que le quede disponible en /cuenta y en
@@ -100,29 +148,29 @@ export function CheckoutForm({
       });
     }
 
-    clearCart();
     router.push(`/checkout/confirmacion/${orderId}`);
+    clearCart();
   }
 
   return (
     <form action={handleSubmit} className="grid gap-10 md:grid-cols-[1fr_320px]">
       <div className="flex flex-col gap-6">
         <div>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          <h2 className="mb-3 eyebrow text-muted">
             Dirección de envío
           </h2>
           <div className="flex flex-col gap-2">
             {addresses.map((a) => (
               <label
                 key={a.id}
-                className="flex cursor-pointer items-start gap-3 rounded-xl bg-surface px-4 py-3 text-sm has-checked:ring-2 has-checked:ring-copper"
+                className="flex cursor-pointer items-start gap-3 rounded-xl border border-line bg-card px-4 py-3 text-sm has-checked:ring-2 has-checked:ring-accent"
               >
                 <input
                   type="radio"
                   name="address"
                   checked={selectedAddressId === a.id}
                   onChange={() => setSelectedAddressId(a.id)}
-                  className="mt-1 accent-copper"
+                  className="mt-1 accent-accent"
                 />
                 <span>
                   {a.line1}, {a.city}
@@ -130,13 +178,13 @@ export function CheckoutForm({
                 </span>
               </label>
             ))}
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl bg-surface px-4 py-3 text-sm has-checked:ring-2 has-checked:ring-copper">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-line bg-card px-4 py-3 text-sm has-checked:ring-2 has-checked:ring-accent">
               <input
                 type="radio"
                 name="address"
                 checked={selectedAddressId === "new"}
                 onChange={() => setSelectedAddressId("new")}
-                className="accent-copper"
+                className="accent-accent"
               />
               Usar una dirección nueva
             </label>
@@ -147,49 +195,64 @@ export function CheckoutForm({
               <input
                 name="line1"
                 required
-                placeholder="Calle y número"
-                className="rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+                aria-required="true"
+                value={newAddress.line1}
+                onChange={updateField("line1")}
+                placeholder="Calle y número *"
+                className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
               />
               <div className="grid grid-cols-2 gap-3">
                 <input
                   name="city"
                   required
-                  placeholder="Ciudad"
-                  className="rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+                  aria-required="true"
+                  value={newAddress.city}
+                  onChange={updateField("city")}
+                  placeholder="Ciudad *"
+                  className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
                 />
-                <input
-                  name="state"
-                  placeholder="Departamento"
-                  className="rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+                <DepartmentSelect
+                  value={newAddress.state}
+                  onChange={(e) => setNewAddress((a) => ({ ...a, state: e.target.value }))}
                 />
               </div>
               <input
                 name="zip"
                 required
-                placeholder="Código postal"
-                className="rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+                aria-required="true"
+                value={newAddress.zip}
+                onChange={updateField("zip")}
+                placeholder="Código postal *"
+                className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
               />
+              <p className="text-xs text-muted">* Campos obligatorios</p>
             </div>
           )}
         </div>
 
         <div>
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          <h2 className="mb-3 eyebrow text-muted">
             Cupón (opcional)
           </h2>
           <input
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value)}
             placeholder="Código de descuento"
-            className="w-full max-w-xs rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full max-w-xs rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </div>
       </div>
 
-      <div className="flex h-fit flex-col gap-4 rounded-2xl bg-surface p-5">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-muted">
-          Resumen
-        </h2>
+      <div className="flex h-fit flex-col gap-4 rounded-2xl border border-line bg-card p-5">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="eyebrow text-muted">Resumen</h2>
+          <Link
+            href="/carrito"
+            className="text-xs font-semibold text-accent hover:text-accent-ink"
+          >
+            Editar<span className="sr-only"> carrito</span>
+          </Link>
+        </div>
         <ul className="flex flex-col gap-2 text-sm">
           {items.map((i) => (
             <li key={i.productId} className="flex justify-between gap-2">
@@ -207,15 +270,21 @@ export function CheckoutForm({
           <span className="font-semibold text-ink">{formatCurrency(subtotal)}</span>
         </div>
 
-        {error && <p className="text-xs text-copper">{error}</p>}
+        {error && <p className="text-xs text-danger">{error}</p>}
 
         <button
           type="submit"
-          disabled={pending}
-          className="rounded-full bg-copper px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-copper-ink disabled:opacity-60"
+          disabled={pending || !addressComplete}
+          aria-describedby={!addressComplete ? "checkout-missing" : undefined}
+          className="rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-ink disabled:bg-line-strong disabled:text-muted disabled:hover:bg-line-strong"
         >
           {pending ? "Procesando…" : "Confirmar compra"}
         </button>
+        {!addressComplete && (
+          <p id="checkout-missing" className="text-xs text-muted">
+            Completa la dirección de envío para confirmar la compra.
+          </p>
+        )}
       </div>
     </form>
   );
