@@ -4,7 +4,7 @@ Ecommerce full-stack (storefront + CMS admin) con un asistente de compras conver
 
 Construido con Next.js 16 (App Router), Supabase (Postgres + pgvector + Auth + Storage) y el SDK de Anthropic.
 
-**Demo:** https://rag-ecommerce-gilt.vercel.app
+**Demo:** https://rag-tech.vercel.app
 
 ## Índice
 
