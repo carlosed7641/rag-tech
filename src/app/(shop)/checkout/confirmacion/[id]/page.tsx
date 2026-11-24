@@ -27,7 +27,7 @@ export default async function OrderConfirmationPage({
         <span className="inline-block h-1.5 w-1.5 rounded-full bg-signal" />
         Orden confirmada
       </div>
-      <h1 className="mb-2 text-2xl font-extrabold text-ink">
+      <h1 className="mb-2 text-[32px] font-bold leading-tight tracking-[-0.03em] text-ink md:text-[40px]">
         ¡Gracias por tu compra!
       </h1>
       <p className="mb-9 text-sm text-muted">Orden #{order.id.slice(0, 8)}</p>
@@ -36,7 +36,7 @@ export default async function OrderConfirmationPage({
 
       <Link
         href="/cuenta"
-        className="mt-10 inline-block text-sm font-semibold text-copper hover:text-copper-ink"
+        className="mt-10 inline-block text-sm font-semibold text-accent hover:text-accent-ink"
       >
         Ver historial de órdenes →
       </Link>

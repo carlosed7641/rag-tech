@@ -29,7 +29,7 @@ export function UserRoleToggle({
         if (!window.confirm(`¿Seguro que quieres ${label} a este usuario?`)) return;
         startTransition(() => setUserRole(userId, nextRole));
       }}
-      className="text-xs font-semibold text-copper hover:text-copper-ink disabled:opacity-60"
+      className="text-xs font-semibold text-accent hover:text-accent-ink disabled:opacity-60"
     >
       {pending ? "Guardando…" : nextRole === "admin" ? "Hacer admin" : "Quitar admin"}
     </button>

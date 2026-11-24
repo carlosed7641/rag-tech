@@ -41,7 +41,23 @@ export async function POST(req: Request) {
   // SQL); igual es seguro porque el user_id que se graba sale exclusivamente
   // de la sesión ya validada arriba, nunca de lo que mande el cliente.
   const adminDb = createAdminClient();
-  let currentSessionId = sessionId ?? null;
+  let currentSessionId: string | null = null;
+
+  // El sessionId llega del navegador: solo se reutiliza si la sesión existe y
+  // pertenece a quien llama (mismo user_id, o anónima en ambos casos). Si no,
+  // se ignora y se crea una nueva — así nadie puede agregar mensajes a la
+  // conversación guardada de otra persona.
+  if (typeof sessionId === "string" && sessionId) {
+    const { data: existing } = await adminDb
+      .from("chat_sessions")
+      .select("id, user_id")
+      .eq("id", sessionId)
+      .maybeSingle();
+    if (existing && existing.user_id === (user?.id ?? null)) {
+      currentSessionId = existing.id;
+    }
+  }
+
   async function ensureSession() {
     if (currentSessionId) return currentSessionId;
     const { data, error } = await adminDb
@@ -62,13 +78,6 @@ export async function POST(req: Request) {
       }
 
       try {
-        const sid = await ensureSession();
-        if (sid && lastUserMessage) {
-          await adminDb
-            .from("chat_messages")
-            .insert({ session_id: sid, role: "user", content: { text: lastUserMessage.content } });
-        }
-
         const runner = anthropic.beta.messages.toolRunner({
           model: "claude-sonnet-5",
           max_tokens: 2048,
@@ -89,17 +98,40 @@ export async function POST(req: Request) {
 
         const products = collected.slice(0, 6);
         send("products", { items: products });
-        send("done", { sessionId: sid });
 
-        if (sid) {
-          await adminDb.from("chat_messages").insert({
-            session_id: sid,
-            role: "assistant",
-            content: { text: fullText, products },
-          });
+        // Solo se guardan intercambios completos: pregunta + respuesta juntas,
+        // y únicamente si el modelo respondió bien. Si falla, no queda nada
+        // en la DB (ni siquiera la sesión, que se crea recién aquí).
+        // Best-effort: un fallo al guardar no afecta la respuesta ya enviada.
+        const sid = await ensureSession();
+        if (sid && lastUserMessage) {
+          const now = Date.now();
+          const { error: saveError } = await adminDb.from("chat_messages").insert([
+            {
+              session_id: sid,
+              role: "user",
+              content: { text: lastUserMessage.content },
+              created_at: new Date(now).toISOString(),
+            },
+            {
+              session_id: sid,
+              role: "assistant",
+              content: { text: fullText, products },
+              // +1 ms: garantiza el orden pregunta → respuesta al leer.
+              created_at: new Date(now + 1).toISOString(),
+            },
+          ]);
+          if (saveError) console.error("[chat] no se pudo guardar el intercambio:", saveError);
         }
+        send("done", { sessionId: sid });
       } catch (err) {
-        send("error", { message: err instanceof Error ? err.message : "Error desconocido." });
+        // El detalle técnico (status de la API, request_id, etc.) solo va al
+        // log del servidor; al cliente le llega un mensaje genérico.
+        console.error("[chat] error generando la respuesta:", err);
+        send("error", {
+          message:
+            "El asistente no está disponible en este momento. Intenta de nuevo en unos minutos.",
+        });
       } finally {
         controller.close();
       }

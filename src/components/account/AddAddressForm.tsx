@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { DepartmentSelect } from "@/components/account/DepartmentSelect";
 
 export function AddAddressForm({ userId }: { userId: string }) {
   const router = useRouter();
@@ -34,7 +35,7 @@ export function AddAddressForm({ userId }: { userId: string }) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="self-start text-sm font-semibold text-copper hover:text-copper-ink"
+        className="self-start text-sm font-semibold text-accent hover:text-accent-ink"
       >
         + Añadir dirección
       </button>
@@ -44,46 +45,42 @@ export function AddAddressForm({ userId }: { userId: string }) {
   return (
     <form
       action={handleSubmit}
-      className="flex flex-col gap-3 rounded-xl bg-surface p-4"
+      className="flex flex-col gap-3 rounded-2xl border border-line bg-card p-4"
     >
       <input
         name="line1"
         required
         placeholder="Calle y número"
-        className="rounded-xl bg-bg px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+        className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
       />
       <div className="grid grid-cols-2 gap-3">
         <input
           name="city"
           required
           placeholder="Ciudad"
-          className="rounded-xl bg-bg px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+          className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
         />
-        <input
-          name="state"
-          placeholder="Departamento"
-          className="rounded-xl bg-bg px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
-        />
+        <DepartmentSelect />
       </div>
       <input
         name="zip"
         required
         placeholder="Código postal"
-        className="rounded-xl bg-bg px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+        className="rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
       />
-      {error && <p className="text-xs text-copper">{error}</p>}
+      {error && <p className="text-xs text-danger">{error}</p>}
       <div className="flex gap-3">
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-copper px-4 py-2 text-xs font-semibold text-white hover:bg-copper-ink disabled:opacity-60"
+          className="rounded-xl bg-accent px-4 py-2 text-xs font-semibold text-white hover:bg-accent-ink disabled:opacity-60"
         >
           {pending ? "Guardando…" : "Guardar dirección"}
         </button>
         <button
           type="button"
           onClick={() => setOpen(false)}
-          className="rounded-full border border-line-strong px-4 py-2 text-xs text-ink hover:border-copper hover:text-copper"
+          className="rounded-xl border border-line-strong px-4 py-2 text-xs text-ink hover:border-accent hover:text-accent"
         >
           Cancelar
         </button>

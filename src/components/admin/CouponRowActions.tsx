@@ -29,7 +29,7 @@ export function CouponRowActions({
           if (!window.confirm("¿Eliminar este cupón?")) return;
           startTransition(() => deleteCoupon(couponId));
         }}
-        className="text-muted hover:text-red-600 disabled:opacity-60"
+        className="text-muted hover:text-danger disabled:opacity-60"
       >
         Eliminar
       </button>

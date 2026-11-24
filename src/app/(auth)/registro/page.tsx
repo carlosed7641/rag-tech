@@ -19,6 +19,9 @@ export default function RegisterPage() {
 
 function RegisterForm() {
   const [serverError, setServerError] = useState<string | null>(null);
+  // Login OK y navegando: el botón sigue deshabilitado hasta que cargue la
+  // página siguiente (isSubmitting vuelve a false antes de que termine la recarga).
+  const [redirecting, setRedirecting] = useState(false);
   const [confirmEmailSent, setConfirmEmailSent] = useState(false);
   const searchParams = useSearchParams();
   const {
@@ -44,6 +47,7 @@ function RegisterForm() {
       // Recarga completa por la misma razón que en /login, y misma lógica
       // de volver a donde el usuario estaba (?next=).
       const target = safeRedirectTarget(searchParams.get("next"));
+      setRedirecting(true);
       window.location.assign(target);
       return;
     }
@@ -57,12 +61,12 @@ function RegisterForm() {
       : "/login";
     return (
       <div className="w-full max-w-sm text-center">
-        <h1 className="mb-4 text-2xl font-extrabold text-ink">Revisa tu correo</h1>
+        <h1 className="mb-4 text-2xl font-bold text-ink">Revisa tu correo</h1>
         <p className="text-muted">
           Te enviamos un enlace de confirmación. Ábrelo para activar tu cuenta
           y luego inicia sesión.
         </p>
-        <Link href={loginHref} className="mt-6 inline-block font-semibold text-copper hover:text-copper-ink">
+        <Link href={loginHref} className="mt-6 inline-block font-semibold text-accent hover:text-accent-ink">
           Ir a iniciar sesión →
         </Link>
       </div>
@@ -71,7 +75,7 @@ function RegisterForm() {
 
   return (
     <div className="w-full max-w-sm">
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Crear cuenta</h1>
+      <h1 className="mb-8 text-[32px] font-bold leading-tight text-ink">Crear cuenta</h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5">
         <Field label="Nombre completo" error={errors.fullName?.message}>
@@ -79,7 +83,7 @@ function RegisterForm() {
             type="text"
             autoComplete="name"
             {...register("fullName")}
-            className="w-full rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </Field>
 
@@ -88,7 +92,7 @@ function RegisterForm() {
             type="email"
             autoComplete="email"
             {...register("email")}
-            className="w-full rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </Field>
 
@@ -97,18 +101,18 @@ function RegisterForm() {
             type="password"
             autoComplete="new-password"
             {...register("password")}
-            className="w-full rounded-xl bg-surface px-3.5 py-2.5 text-sm text-ink outline-none focus:ring-2 focus:ring-copper"
+            className="w-full rounded-[11px] border border-line-strong bg-card px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-ink focus:ring-[3px] focus:ring-mint"
           />
         </Field>
 
-        {serverError && <p className="text-xs text-copper">{serverError}</p>}
+        {serverError && <p className="text-xs text-danger">{serverError}</p>}
 
         <button
           type="submit"
-          disabled={isSubmitting}
-          className="mt-2 rounded-full bg-copper px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-copper-ink disabled:opacity-60"
+          disabled={isSubmitting || redirecting}
+          className="mt-2 rounded-xl bg-accent px-6 py-3 text-sm font-semibold text-white transition-colors hover:bg-accent-ink disabled:opacity-60"
         >
-          {isSubmitting ? "Creando cuenta…" : "Crear cuenta"}
+          {isSubmitting || redirecting ? "Creando cuenta…" : "Crear cuenta"}
         </button>
       </form>
 
@@ -120,7 +124,7 @@ function RegisterForm() {
               ? `/login?next=${encodeURIComponent(searchParams.get("next")!)}`
               : "/login"
           }
-          className="font-semibold text-copper hover:text-copper-ink"
+          className="font-semibold text-accent hover:text-accent-ink"
         >
           Inicia sesión
         </Link>
@@ -140,11 +144,11 @@ function Field({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold uppercase tracking-wide text-muted">
+      <span className="eyebrow text-muted">
         {label}
       </span>
       {children}
-      {error && <span className="text-xs text-copper">{error}</span>}
+      {error && <span className="text-xs text-danger">{error}</span>}
     </label>
   );
 }

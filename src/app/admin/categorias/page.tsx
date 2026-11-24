@@ -7,13 +7,13 @@ export default async function AdminCategoriesPage() {
 
   return (
     <div>
-      <h1 className="mb-8 text-2xl font-extrabold text-ink">Categorías</h1>
+      <h1 className="mb-8 text-3xl font-bold tracking-[-0.03em] text-ink">Categorías</h1>
 
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="overflow-hidden rounded-lg border border-line">
+        <div className="overflow-hidden rounded-2xl border border-line bg-card">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-line bg-surface text-left text-xs font-medium uppercase tracking-wide text-muted">
+              <tr className="border-b border-line bg-surface text-left eyebrow text-muted">
                 <th className="px-4 py-3">Nombre</th>
                 <th className="px-4 py-3">Slug</th>
                 <th className="px-4 py-3" />

@@ -26,10 +26,10 @@ export default async function AdminProductsPage({
   return (
     <div>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-extrabold text-ink">Productos</h1>
+        <h1 className="text-3xl font-bold tracking-[-0.03em] text-ink">Productos</h1>
         <Link
           href="/admin/productos/nuevo"
-          className="rounded-full bg-copper px-5 py-2.5 text-sm font-semibold text-white hover:bg-copper-ink"
+          className="rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white hover:bg-accent-ink"
         >
           + Nuevo producto
         </Link>
@@ -45,10 +45,10 @@ export default async function AdminProductsPage({
         />
       </form>
 
-      <div className="overflow-x-auto rounded-lg border border-line">
+      <div className="overflow-x-auto rounded-2xl border border-line bg-card">
         <table className="w-full min-w-[640px] text-sm">
           <thead>
-            <tr className="border-b border-line bg-surface text-left text-xs font-medium uppercase tracking-wide text-muted">
+            <tr className="border-b border-line bg-surface text-left eyebrow text-muted">
               <th className="px-4 py-3">Producto</th>
               <th className="px-4 py-3">Precio</th>
               <th className="px-4 py-3">Stock</th>
@@ -62,13 +62,13 @@ export default async function AdminProductsPage({
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/productos/${p.id}`}
-                    className="flex items-center gap-3 font-medium text-ink hover:text-copper"
+                    className="flex items-center gap-3 font-medium text-ink hover:text-accent"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={p.images?.[0]}
                       alt=""
-                      className="h-10 w-10 flex-none rounded-md bg-surface object-cover"
+                      className="h-10 w-10 flex-none rounded-md bg-surface object-contain"
                     />
                     {p.name}
                   </Link>
@@ -79,8 +79,8 @@ export default async function AdminProductsPage({
                   <span
                     className={
                       p.is_active
-                        ? "rounded-full bg-signal/10 px-2.5 py-1 text-xs font-semibold text-signal"
-                        : "rounded-full bg-muted/10 px-2.5 py-1 text-xs font-semibold text-muted"
+                        ? "rounded-md bg-signal/10 px-2.5 py-1 text-xs font-semibold text-signal"
+                        : "rounded-md bg-muted/10 px-2.5 py-1 text-xs font-semibold text-muted"
                     }
                   >
                     {p.is_active ? "Activo" : "Inactivo"}
