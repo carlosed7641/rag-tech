@@ -11,7 +11,7 @@
 
 ## Contexto
 
-Directorio `/Users/carloscastro/Desktop/rag-ecommerce` vacío. Proyecto greenfield.
+Directorio `/Users/carloscastro/Desktop/rag-tech` vacío. Proyecto greenfield.
 Node v20.12.2 disponible, sin Docker.
 
 Objetivo en dos fases:
