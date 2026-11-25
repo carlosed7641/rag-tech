@@ -118,18 +118,22 @@ export async function getPriceBounds() {
   };
 }
 
-/** Productos por slug, en el mismo orden de `slugs` (los inexistentes se omiten). */
+/**
+ * Productos activos por slug, con su categoría, en el mismo orden de `slugs`
+ * (los inexistentes o inactivos se omiten).
+ */
 export async function getProductsBySlugs(slugs: string[]) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("products")
-    .select("*")
-    .in("slug", slugs);
+    .select("*, categories(name, slug)")
+    .in("slug", slugs)
+    .eq("is_active", true);
 
   if (error) throw error;
   return slugs
     .map((slug) => data.find((p) => p.slug === slug))
-    .filter((p): p is Product => Boolean(p));
+    .filter((p): p is NonNullable<typeof p> => Boolean(p));
 }
 
 export async function getProductBySlug(slug: string) {

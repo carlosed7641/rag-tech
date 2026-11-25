@@ -39,6 +39,30 @@ export const CartIcon = (p: IconProps) => (
     <circle cx="17" cy="20.5" r="1" />
   </Icon>
 );
+/**
+ * "Añadir al carrito": ícono bx-cart-add de Boxicons (el BiCartAdd de
+ * react-icons), copiado tal cual. Licencia MIT. Es de relleno, no de trazo.
+ */
+export const CartPlusIcon = ({ size = 18, ...rest }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    {...rest}
+  >
+    <circle cx="10.5" cy="19.5" r="1.5" />
+    <circle cx="17.5" cy="19.5" r="1.5" />
+    <path d="M13 13h2v-2.99h2.99v-2H15V5.03h-2v2.98h-2.99v2H13V13z" />
+    <path d="M10 17h8a1 1 0 0 0 .93-.64L21.76 9h-2.14l-2.31 6h-6.64L6.18 4.23A2 2 0 0 0 4.33 3H2v2h2.33l4.75 11.38A1 1 0 0 0 10 17z" />
+  </svg>
+);
+export const CheckIcon = (p: IconProps) => (
+  <Icon strokeWidth={2.2} {...p}>
+    <path d="M5 12.5l4.5 4.5L19 7.5" />
+  </Icon>
+);
 export const UserIcon = (p: IconProps) => (
   <Icon {...p}>
     <circle cx="12" cy="8" r="4" />

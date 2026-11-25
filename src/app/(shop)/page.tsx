@@ -6,7 +6,8 @@ import {
   getProductsBySlugs,
 } from "@/lib/products";
 import { ProductCard } from "@/components/product/ProductCard";
-import { HomeAssistant, TryAssistantButton } from "@/components/chat/HomeAssistant";
+import { HeroShowcase, type HeroProduct } from "@/components/home/HeroShowcase";
+import { TryAssistantButton } from "@/components/chat/TryAssistantButton";
 import { CATEGORY_ICONS, PlugIcon } from "@/components/ui/icons";
 
 // Descriptor corto por categoría (slug de `categories`). Si aparece una
@@ -20,9 +21,10 @@ const CATEGORY_BLURB: Record<string, string> = {
   accesorios: "Power banks, cargadores, cables",
 };
 
-// Productos reales que aparecen en la conversación de ejemplo del hero. Si
-// cambias los productos, ajusta también el texto en HomeAssistant.tsx.
-const EXAMPLE_PRODUCT_SLUGS = ["ragtech-glide", "ragtech-glide-pro"];
+// Productos del hero (vitrina). Se editan aquí: los slugs que no existan o
+// estén inactivos se omiten solos.
+const HERO_SLIDE_SLUGS = ["audifonos-modernos", "ragtech-boom-40", "ragtech-type-60"];
+const HERO_SIDE_SLUGS = ["ragtech-pad-x", "ragtech-glide-pro"];
 
 const STEPS = [
   {
@@ -44,19 +46,25 @@ const STEPS = [
 ];
 
 export default async function HomePage() {
-  const [featured, bestSellers, categories, exampleRows] = await Promise.all([
+  const [featured, bestSellers, categories, heroRows] = await Promise.all([
     getFeaturedProducts(4),
     getBestSellers(4),
     getCategories(),
-    getProductsBySlugs(EXAMPLE_PRODUCT_SLUGS),
+    getProductsBySlugs([...HERO_SLIDE_SLUGS, ...HERO_SIDE_SLUGS]),
   ]);
 
-  const examples = exampleRows.map((p) => ({
+  const toHero = (p: (typeof heroRows)[number]): HeroProduct => ({
+    id: p.id,
     slug: p.slug,
     name: p.name,
+    description: p.description,
     price: p.price,
+    stock: p.stock,
     image: p.images[0] ?? null,
-  }));
+    category: p.categories?.name ?? null,
+  });
+  const heroSlides = heroRows.filter((p) => HERO_SLIDE_SLUGS.includes(p.slug)).map(toHero);
+  const heroSide = heroRows.filter((p) => HERO_SIDE_SLUGS.includes(p.slug)).map(toHero);
 
   // La primera categoría (Audio si existe) ocupa el bloque grande del bento.
   const ordered = [
@@ -67,7 +75,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <HomeAssistant examples={examples} />
+      <HeroShowcase slides={heroSlides} side={heroSide} />
 
       <section aria-label="Garantías" className="border-y border-line bg-card">
         <div className="mx-auto grid max-w-[1240px] grid-cols-2 px-4 md:grid-cols-4 md:px-6">
