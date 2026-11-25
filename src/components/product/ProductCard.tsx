@@ -22,7 +22,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <article className="group relative flex min-w-0 flex-col overflow-hidden rounded-2xl border border-line bg-card p-3 transition-[border-color,box-shadow] hover:border-line-strong hover:shadow-[0_18px_40px_rgba(11,31,22,0.08)] md:p-0">
-      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-surface md:rounded-none">
+      <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-white md:rounded-none">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={product.images[0]}

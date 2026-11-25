@@ -33,11 +33,12 @@ function toCard(p: {
 }
 
 /**
- * Arma las tools del chat para UNA request puntual. `collected` recibe (por
- * referencia, push) las tarjetas de producto que las tools de búsqueda vayan
- * encontrando, para que la ruta pueda mandarlas a la UI aparte del texto de
- * Claude — cada request tiene su propio array, nada se comparte entre
- * usuarios ni entre requests concurrentes.
+ * Arma las tools del chat para UNA request puntual. `collected` es el pool
+ * (por referencia, sin duplicados) de todos los productos que las búsquedas
+ * devolvieron en esta request. NO son las tarjetas a mostrar: la ruta elige de
+ * este pool solo los que Claude nombra en su respuesta (ver
+ * `selectMentionedCards` en cards.ts). Cada request tiene su propio array,
+ * nada se comparte entre usuarios ni entre requests concurrentes.
  *
  * `userId` es siempre el de la sesión del servidor (o null si es anónimo):
  * get_order_status solo se agrega a la lista si hay sesión, y aunque se
@@ -45,6 +46,14 @@ function toCard(p: {
  * hay forma de que Claude pida la orden de otro usuario.
  */
 export function buildChatTools(userId: string | null, collected: ProductCard[]) {
+  // Agrega al pool sin duplicar (Claude puede encadenar varias búsquedas y
+  // recomendar productos de cualquiera de ellas).
+  const remember = (cards: ProductCard[]) => {
+    for (const card of cards) {
+      if (!collected.some((c) => c.id === card.id)) collected.push(card);
+    }
+  };
+
   const searchProductsByAttributes = betaZodTool({
     name: "search_products_by_attributes",
     description:
@@ -98,13 +107,7 @@ export function buildChatTools(userId: string | null, collected: ProductCard[]) 
       if (error) return `Error consultando productos: ${error.message}`;
       if (!data || data.length === 0) return "No se encontraron productos con esos filtros.";
 
-      // Reemplaza (no acumula) lo recolectado: si Claude encadena varias
-      // tools en el mismo turno, las tarjetas deben reflejar la búsqueda más
-      // específica —normalmente la última—, no la unión de todas. Si no,
-      // resultados de un filtro genérico anterior (ej. precio sin categoría)
-      // se cuelan antes que los realmente relevantes.
-      collected.length = 0;
-      data.forEach((p) => collected.push(toCard(p)));
+      remember(data.map(toCard));
 
       return JSON.stringify(
         data.map((p) => ({
@@ -151,8 +154,7 @@ export function buildChatTools(userId: string | null, collected: ProductCard[]) 
       if (error) return `Error en la búsqueda semántica: ${error.message}`;
       if (!data || data.length === 0) return "No se encontraron productos similares a esa descripción.";
 
-      collected.length = 0;
-      data.forEach((p) => collected.push(toCard(p)));
+      remember(data.map(toCard));
 
       return JSON.stringify(
         data.map((p) => ({

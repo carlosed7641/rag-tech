@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { buildChatTools, type ProductCard } from "@/lib/chat/tools";
+import { selectMentionedCards } from "@/lib/chat/cards";
 
 export const maxDuration = 60;
 
@@ -14,7 +15,10 @@ Reglas estrictas:
 - Nunca inventas productos, precios, materiales ni stock. Toda esa información sale exclusivamente de las herramientas que tienes disponibles — si no las usaste, no afirmes datos concretos de productos.
 - Si una pregunta tiene un filtro exacto (precio, categoría, material, disponibilidad), usa search_products_by_attributes. Si es una búsqueda por significado o descripción libre, usa search_products_semantic. Puedes combinarlas.
 - Para el estado de una orden usa get_order_status. Si esa herramienta no está disponible, es porque no hay una sesión iniciada — dile al usuario que debe iniciar sesión para consultar sus órdenes.
-- Responde siempre en español, en tono cercano y breve. Cuando menciones productos concretos, la interfaz ya muestra tarjetas con imagen y precio — no hace falta que describas cada dato en el texto, solo comenta lo relevante.`;
+- Responde siempre en español, en tono cercano y breve. Cuando menciones productos concretos, la interfaz ya muestra tarjetas con imagen y precio — no hace falta que describas cada dato en el texto, solo comenta lo relevante.
+- Las búsquedas pueden devolver productos que no tienen relación con lo que pidió el usuario: menciona SOLO los que realmente responden a su pregunta.
+- Cuando recomiendes un producto, escribe su nombre EXACTAMENTE como aparece en los resultados (por ejemplo en negrita). La interfaz solo muestra tarjetas de los productos que nombres así.
+- Si el mensaje empieza con 'Sobre el producto "X":', el usuario está viendo ese producto. Nunca lo propongas como alternativa o sugerencia de sí mismo; si no hay alternativas que cumplan lo pedido, dilo claramente.`;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -96,7 +100,14 @@ export async function POST(req: Request) {
           }
         }
 
-        const products = collected.slice(0, 6);
+        // Solo los productos que Claude nombró en su respuesta, en ese orden
+        // (no los resultados crudos de la búsqueda, que incluyen relleno).
+        // El producto de referencia ("Pregúntale a la ficha") no se sugiere a
+        // sí mismo, aunque Claude lo nombre para comparar.
+        const subject = lastUserMessage?.content.match(/^Sobre el producto "([^"]+)"/)?.[1];
+        const products = selectMentionedCards(fullText, collected, {
+          exclude: subject ? [subject] : [],
+        });
         send("products", { items: products });
 
         // Solo se guardan intercambios completos: pregunta + respuesta juntas,

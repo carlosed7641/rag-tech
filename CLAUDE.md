@@ -25,5 +25,5 @@ Ecommerce (Next.js App Router + Supabase) con un chat de compras que usa tool ca
 - Schemas Zod se comparten entre formulario, API route y `inputSchema` de las tools del chat (`src/lib/schemas/`) — no duplicar validación.
 - Precios en **COP**, no USD/MXN.
 - Al editar un producto desde el CMS, marcar `embedding_updated_at = null` para que quede pendiente de re-embeber (no recalcular el embedding de forma síncrona/bloqueante ahí).
-- Las tools de búsqueda del chat reemplazan (no acumulan) el array `collected` de tarjetas de producto por request — si Claude encadena varias tool calls, las tarjetas deben reflejar la búsqueda más específica, no la unión de todas.
+- Tarjetas de producto del chat: las tools de búsqueda acumulan (sin duplicados) en `collected` todo lo que devuelven en la request, pero la UI solo recibe los productos que Claude **nombra** en su respuesta final, en ese orden (`selectMentionedCards` en `src/lib/chat/cards.ts`). Nunca mandar los resultados crudos: la búsqueda semántica siempre rellena hasta N con productos sin relación.
 - Rutas de la tienda van en el route group `(shop)` (con header/footer propio); `/admin`, `/login` y `/registro` NO llevan ese layout.

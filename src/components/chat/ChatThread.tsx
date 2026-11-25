@@ -93,7 +93,7 @@ function Bubble({
               href={`/productos/${p.slug}`}
               className="group flex min-w-0 flex-col gap-2 rounded-xl border border-line bg-card p-2.5 text-ink transition-colors hover:border-accent"
             >
-              <div className="aspect-[4/3] overflow-hidden rounded-lg bg-surface">
+              <div className="aspect-[4/3] overflow-hidden rounded-lg bg-white">
                 {p.image && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img

@@ -20,6 +20,13 @@ export type HeroProduct = {
 };
 
 const AUTOPLAY_MS = 6000;
+/** Duración de la transición entre slides (flechas, puntos y autoplay). */
+const SLIDE_MS = 700;
+
+/** Acelera al inicio y frena al final: se siente más suave que el smooth nativo. */
+function easeInOutCubic(t: number) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
 
 /**
  * Hero del home, estilo vitrina: carrusel con un producto destacado a la
@@ -61,6 +68,7 @@ export function HeroShowcase({
  */
 function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const animRef = useRef<number | null>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
@@ -69,15 +77,52 @@ function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
+  /** Cancela una animación en curso y devuelve el snap al contenedor. */
+  function stopAnimation() {
+    if (animRef.current !== null) {
+      cancelAnimationFrame(animRef.current);
+      animRef.current = null;
+    }
+    if (trackRef.current) trackRef.current.style.scrollSnapType = "";
+  }
+
+  /**
+   * Va al slide `i` con una animación propia (ease-in-out, SLIDE_MS). El snap
+   * se desactiva durante la animación: con snap obligatorio el navegador
+   * "corrige" la posición en cada frame y la transición da saltos.
+   */
   function go(i: number) {
     const el = trackRef.current;
     if (!el) return;
-    const target = (i + count) % count;
-    el.scrollTo({
-      left: target * el.clientWidth,
-      behavior: prefersReducedMotion() ? "auto" : "smooth",
-    });
+    const target = ((i + count) % count) * el.clientWidth;
+    stopAnimation();
+
+    if (prefersReducedMotion()) {
+      el.scrollLeft = target;
+      return;
+    }
+
+    const from = el.scrollLeft;
+    const distance = target - from;
+    if (Math.abs(distance) < 1) return;
+    const start = performance.now();
+    el.style.scrollSnapType = "none";
+
+    const step = (now: number) => {
+      const t = Math.min(1, (now - start) / SLIDE_MS);
+      el.scrollLeft = from + distance * easeInOutCubic(t);
+      if (t < 1) {
+        animRef.current = requestAnimationFrame(step);
+      } else {
+        animRef.current = null;
+        el.style.scrollSnapType = "";
+      }
+    };
+    animRef.current = requestAnimationFrame(step);
   }
+
+  // Limpieza al desmontar.
+  useEffect(() => stopAnimation, []);
 
   function onScroll() {
     const el = trackRef.current;
@@ -112,6 +157,8 @@ function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
       <div
         ref={trackRef}
         onScroll={onScroll}
+        onPointerDown={stopAnimation}
+        onWheel={stopAnimation}
         className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
       >
         {slides.map((p, i) => (
