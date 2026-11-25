@@ -20,8 +20,6 @@ export type HeroProduct = {
 };
 
 const AUTOPLAY_MS = 6000;
-/** Distancia mínima (px) de un deslizamiento horizontal para cambiar de slide. */
-const SWIPE_THRESHOLD = 50;
 
 /**
  * Hero del home, estilo vitrina: carrusel con un producto destacado a la
@@ -56,41 +54,47 @@ export function HeroShowcase({
   );
 }
 
+/**
+ * Carrusel con scroll horizontal nativo + CSS scroll snap: en móvil el slide
+ * sigue al dedo y se acomoda al soltar; en escritorio flechas y puntos hacen
+ * scroll al slide. El slide activo se deduce de la posición del scroll.
+ */
 function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const count = slides.length;
 
-  // Avance automático: se pausa con mouse/foco encima y si el sistema pide
-  // reducir animaciones.
+  function prefersReducedMotion() {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  function go(i: number) {
+    const el = trackRef.current;
+    if (!el) return;
+    const target = (i + count) % count;
+    el.scrollTo({
+      left: target * el.clientWidth,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    });
+  }
+
+  function onScroll() {
+    const el = trackRef.current;
+    if (!el || el.clientWidth === 0) return;
+    const i = Math.round(el.scrollLeft / el.clientWidth);
+    if (i !== index) setIndex(i);
+  }
+
+  // Avance automático: un temporizador por slide (se reinicia también cuando
+  // el usuario desliza a mano). Pausado con mouse/foco/dedo encima y si el
+  // sistema pide reducir animaciones.
   useEffect(() => {
-    if (count < 2 || paused) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % count), AUTOPLAY_MS);
-    return () => clearInterval(id);
-  }, [count, paused]);
-
-  const go = (i: number) => setIndex((i + count) % count);
-
-  // Deslizar con el dedo sobre todo el carrusel (móvil). Solo cuenta si el
-  // gesto es más horizontal que vertical, para no robarle el scroll a la página.
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
-  function onTouchStart(e: React.TouchEvent) {
-    const t = e.touches[0];
-    touchStart.current = { x: t.clientX, y: t.clientY };
-    setPaused(true);
-  }
-  function onTouchEnd(e: React.TouchEvent) {
-    const start = touchStart.current;
-    touchStart.current = null;
-    setPaused(false);
-    if (!start || count < 2) return;
-    const t = e.changedTouches[0];
-    const dx = t.clientX - start.x;
-    const dy = t.clientY - start.y;
-    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy)) return;
-    go(dx < 0 ? index + 1 : index - 1);
-  }
+    if (count < 2 || paused || prefersReducedMotion()) return;
+    const t = setTimeout(() => go(index + 1), AUTOPLAY_MS);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `go` solo lee refs/count
+  }, [index, paused, count]);
 
   return (
     <div
@@ -101,11 +105,15 @@ function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
       onBlur={() => setPaused(false)}
-      onTouchStart={onTouchStart}
-      onTouchEnd={onTouchEnd}
-      className="relative touch-pan-y overflow-hidden rounded-[20px] bg-mint-soft lg:col-span-7"
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+      className="relative overflow-hidden rounded-[20px] bg-mint-soft lg:col-span-7"
     >
-      <div className="grid">
+      <div
+        ref={trackRef}
+        onScroll={onScroll}
+        className="no-scrollbar flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain"
+      >
         {slides.map((p, i) => (
           <div
             key={p.id}
@@ -114,9 +122,7 @@ function FeaturedCarousel({ slides }: { slides: HeroProduct[] }) {
             aria-label={`${i + 1} de ${count}`}
             aria-hidden={i !== index}
             inert={i !== index}
-            className={`col-start-1 row-start-1 transition-opacity duration-500 ${
-              i === index ? "opacity-100" : "pointer-events-none opacity-0"
-            }`}
+            className="w-full flex-none snap-center snap-always"
           >
             <Slide product={p} />
           </div>

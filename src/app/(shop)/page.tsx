@@ -106,13 +106,13 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1240px] px-4 py-14 md:px-6">
         <SectionHead eyebrow="Recién llegados" title="Especificaciones claras, sin relleno" />
-        <ProductGrid products={featured} />
+        <ProductGrid products={featured} label="Recién llegados" />
       </section>
 
       {bestSellers.length > 0 && (
         <section className="mx-auto max-w-[1240px] px-4 pb-24 pt-4 md:px-6">
           <SectionHead eyebrow="Más vendidos" title="Lo que más se llevan" />
-          <ProductGrid products={bestSellers} />
+          <ProductGrid products={bestSellers} label="Más vendidos" />
         </section>
       )}
 
@@ -159,11 +159,34 @@ function SectionHead({ eyebrow, title }: { eyebrow: string; title: string }) {
   );
 }
 
-function ProductGrid({ products }: { products: Parameters<typeof ProductCard>[0]["product"][] }) {
+/**
+ * Vitrina de productos.
+ * - Móvil (< md): slider horizontal con CSS scroll snap (sin JS ni librerías).
+ *   Se ven 2 tarjetas y asoma la tercera para indicar que se puede deslizar;
+ *   llega a los bordes de la pantalla pero la primera tarjeta queda alineada
+ *   con el margen del contenido (scroll-padding).
+ * - Desde md: grilla de 2 / 4 columnas.
+ */
+function ProductGrid({
+  products,
+  label,
+}: {
+  products: Parameters<typeof ProductCard>[0]["product"][];
+  label: string;
+}) {
   return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+    <div
+      role="region"
+      aria-label={label}
+      tabIndex={0}
+      className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-1 outline-none focus-visible:ring-2 focus-visible:ring-focus md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:p-0 lg:grid-cols-4"
+    >
       {products.map((p) => (
-        <ProductCard key={p.id} product={p} />
+        // Ancho: mitad del área visible menos el gap y un margen para que asome
+        // la siguiente tarjeta. `grid` hace que la tarjeta llene el alto de la fila.
+        <div key={p.id} className="grid w-[calc(50%-22px)] flex-none snap-start md:w-auto">
+          <ProductCard product={p} />
+        </div>
       ))}
     </div>
   );

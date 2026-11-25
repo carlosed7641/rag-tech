@@ -180,3 +180,12 @@ button:disabled,
     display: none;
   }
 }
+
+/* Contenedores con scroll horizontal (carruseles con snap): sin barra visible
+   en ningún tamaño; se navegan con gesto, flechas o puntos. */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
